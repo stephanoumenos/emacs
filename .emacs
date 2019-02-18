@@ -1,3 +1,21 @@
+;;; Code
+
+(defun get-string-from-file (filePath)
+  "Return FILEPATH's file content."
+  (with-temp-buffer
+    (insert-file-contents filePath)
+    (buffer-string)))
+
+(defun remove-newline (x)
+  (replace-regexp-in-string "\n$" "" x))
+
+(defun go-to-roothere ()
+  "Go to my roothere."
+  (interactive)
+  (dired (remove-newline (get-string-from-file "~/.roothere"))))
+
+;;;;;;;;
+
 (require 'package)
 
 (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
@@ -27,6 +45,7 @@
 
 (use-package auto-complete
   :ensure t
+  :config (ac-config-default)
   :init (global-auto-complete-mode 1))
 
 (use-package linum-relative
@@ -36,19 +55,35 @@
 (use-package yasnippet-snippets
   :ensure t)
 
+(use-package markdown-mode
+  :ensure t
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "pandoc"))
+
+(use-package helm
+  :ensure t
+  :init (helm-mode 1))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Custom keys
 
 (global-set-key (kbd "C-x h") 'previous-buffer)
 (global-set-key (kbd "C-x l") 'next-buffer)
-
+(global-set-key (kbd "M-x") 'helm-M-x)
+(global-set-key (kbd "C-x C-f") 'helm-find-files)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Other
 
 (tool-bar-mode -1)
+(setq-default c-basic-offset 4)
+(setq-default c-default-style "k&r")
+;;(go-to-roothere)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -57,9 +92,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(inhibit-startup-screen t)
  '(package-selected-packages
    (quote
-    (auto-complete flycheck use-package helm evil-visual-mark-mode))))
+    (markdown-mode auto-complete flycheck use-package helm evil-visual-mark-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
